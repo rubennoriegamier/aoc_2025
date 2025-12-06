@@ -27,8 +27,8 @@ def part_1_and_2(grid: list[str]) -> tuple[int, int]:
         y_a, y_z = np.flatnonzero(le_4.any(1))[[0, -1]]
         x_a, x_z = np.flatnonzero(le_4.any(0))[[0, -1]]
 
-        conv_ = conv[max(0, y_a - 1):min(conv.shape[0], y_z + 2), max(0, x_a - 1):min(conv.shape[1], x_z + 2)]
-        le_4_ = le_4[max(0, y_a - 1):min(le_4.shape[0], y_z + 2), max(0, x_a - 1):min(le_4.shape[1], x_z + 2)]
+        conv_ = conv[max(0, y_a - 1):y_z + 2, max(0, x_a - 1):x_z + 2]
+        le_4_ = le_4[max(0, y_a - 1):y_z + 2, max(0, x_a - 1):x_z + 2]
 
         conv_[:-1, :-1][le_4_[1:, 1:]] -= 1
         conv_[:-1, :][le_4_[1:, :]] -= 1
