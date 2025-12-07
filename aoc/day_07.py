@@ -16,7 +16,7 @@ def part_1(diagram: list[str]) -> int:
     while beams:
         if (beam := beams.pop()) not in splits:
             y, x = beam
-            if 0 <= y < len(diagram) and 0 <= x < len(diagram[0]):
+            if y < len(diagram):
                 if diagram[y][x] == '^':
                     splits.add(beam)
                     beams.add((y, x - 1))
