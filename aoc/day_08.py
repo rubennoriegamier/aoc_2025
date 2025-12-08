@@ -21,7 +21,7 @@ def parse_junk_box(raw_value: str) -> JunkBox:
 
 
 def part_1_and_2(junk_boxes: list[JunkBox], pairs_count: int) -> tuple[int, int]:
-    distance_idxs = np.argsort(pdist(junk_boxes, metric='euclidean'))
+    distance_idxs = np.argsort(pdist(junk_boxes, metric='sqeuclidean').astype(np.uint64))
     jb_a_idxs, jb_b_idxs = np.triu_indices(len(junk_boxes), 1)
     jb_a_idxs = jb_a_idxs[distance_idxs]
     jb_b_idxs = jb_b_idxs[distance_idxs]
