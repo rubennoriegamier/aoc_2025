@@ -3,13 +3,17 @@ from dataclasses import dataclass
 from functools import reduce
 from itertools import combinations
 from operator import mul
+from time import perf_counter
 from typing import Self
 
 
 def main():
     junk_boxes: list[JunkBox] = list(map(JunkBox.parse, fileinput.input()))
 
+    t_1 = perf_counter()
     print(*part_1_and_2(junk_boxes, 1_000), sep='\n')
+    t_2 = perf_counter()
+    print(round((t_2 - t_1) * 1_000, 3))
 
 
 @dataclass(frozen=True, slots=True)
@@ -23,7 +27,7 @@ class JunkBox:
         return cls(*map(int, raw_value.split(',')))
 
     def distance_to(self, other: Self) -> int:
-        return abs(self.x - other.x) ** 2 + abs(self.y - other.y) ** 2 + abs(self.z - other.z) ** 2
+        return (self.x - other.x) ** 2 + (self.y - other.y) ** 2 + (self.z - other.z) ** 2
 
 
 def part_1_and_2(junk_boxes: list[JunkBox], pairs_count: int) -> tuple[int, int]:
