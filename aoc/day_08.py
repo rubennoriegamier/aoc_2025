@@ -1,52 +1,44 @@
 import fileinput
-from collections import deque
-from dataclasses import dataclass
 from functools import reduce
-from itertools import combinations
 from operator import mul
-from typing import Self
+
+import numpy as np
+
+type JunkBox = tuple[int, int, int]
+from scipy.spatial.distance import pdist
+from scipy.cluster.hierarchy import DisjointSet
 
 
 def main():
-    junk_boxes: list[JunkBox] = list(map(JunkBox.parse, fileinput.input()))
+    junk_boxes: list[JunkBox] = list(map(parse_junk_box, fileinput.input()))
 
     print(*part_1_and_2(junk_boxes, 1_000), sep='\n')
 
 
-@dataclass(frozen=True, slots=True)
-class JunkBox:
-    x: int
-    y: int
-    z: int
-
-    @classmethod
-    def parse(cls, raw_value: str) -> Self:
-        return cls(*map(int, raw_value.split(',')))
-
-    def distance_to(self, other: Self) -> int:
-        return (self.x - other.x) ** 2 + (self.y - other.y) ** 2 + (self.z - other.z) ** 2
+def parse_junk_box(raw_value: str) -> JunkBox:
+    # noinspection PyTypeChecker
+    return tuple(map(int, raw_value.split(',')))
 
 
 def part_1_and_2(junk_boxes: list[JunkBox], pairs_count: int) -> tuple[int, int]:
-    pairs = sorted(combinations(junk_boxes, 2), key=lambda pair: pair[0].distance_to(pair[1]))
-    networks = deque()
+    distance_idxs = np.argsort(pdist(junk_boxes, metric='euclidean'))
+    jb_a_idxs, jb_b_idxs = np.triu_indices(len(junk_boxes), 1)
+    jb_a_idxs = jb_a_idxs[distance_idxs]
+    jb_b_idxs = jb_b_idxs[distance_idxs]
+    networks = DisjointSet(junk_boxes)
     part_1 = 0
     part_2 = 0
 
-    for i, (jb_a, jb_b) in enumerate(pairs, 1):
-        network = {jb_a, jb_b}
+    for i in range(len(jb_a_idxs)):
+        jb_a = junk_boxes[jb_a_idxs[i]]
+        jb_b = junk_boxes[jb_b_idxs[i]]
 
-        for _ in range(len(networks)):
-            if network.isdisjoint(networks[0]):
-                networks.rotate(-1)
-            else:
-                network.update(networks.popleft())
-        networks.append(network)
+        networks.merge(jb_a, jb_b)
 
-        if i == pairs_count:
-            part_1 = reduce(mul, sorted(map(len, networks))[-3:])
-        elif len(networks[0]) == len(junk_boxes):
-            part_2 = jb_a.x * jb_b.x
+        if i == pairs_count - 1:
+            part_1 = reduce(mul, sorted(map(len, networks.subsets()))[-3:])
+        elif networks.n_subsets == 1:
+            part_2 = jb_a[0] * jb_b[0]
             break
 
     return part_1, part_2
