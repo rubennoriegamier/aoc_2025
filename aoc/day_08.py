@@ -40,8 +40,7 @@ def part_1_and_2(junk_boxes: list[JunkBox], pairs_count: int) -> tuple[int, int]
             if network.isdisjoint(networks[0]):
                 networks.rotate(-1)
             else:
-                network.update(networks[0])
-                del networks[0]
+                network.update(networks.popleft())
         networks.append(network)
 
         if i == pairs_count:
