@@ -1,8 +1,5 @@
 import fileinput
-from bisect import bisect
-from itertools import combinations, islice
-
-from shapely import Polygon, box, covers
+from itertools import combinations, pairwise
 
 type Tile = tuple[int, int]
 
@@ -27,22 +24,22 @@ def part_1(tiles: list[Tile]) -> int:
 
 # noinspection PyTypeChecker
 def part_2(tiles: list[Tile]) -> int | None:
-    polygon = Polygon(tiles)
     rects = sorted(combinations(tiles, 2), reverse=True,
                    key=lambda r: (abs(r[1][0] - r[0][0]) + 1) * (abs(r[1][1] - r[0][1]) + 1))
-    sorted_tiles = sorted(tiles)
+    sorted_segments = sorted(((min(x_3, x_4), min(y_3, y_4)),
+                              (max(x_3, x_4), max(y_3, y_4)))
+                             for (x_3, y_3), (x_4, y_4) in pairwise(tiles + [tiles[0]]))
 
     # noinspection PyInconsistentReturns
     for (x_1, y_1), (x_2, y_2) in rects:
         x_1, x_2 = sorted([x_1, x_2])
         y_1, y_2 = sorted([y_1, y_2])
 
-        for x, y in islice(sorted_tiles, bisect(sorted_tiles, (x_1 + 1,)), None):
-            if x < x_2 and y_1 < y < y_2:
+        for (x_3, y_3), (x_4, y_4) in sorted_segments:
+            if x_4 > x_1 and x_3 < x_2 and y_4 > y_1 and y_3 < y_2:
                 break
         else:
-            if covers(polygon, box(x_1, y_1, x_2, y_2)):
-                return (x_2 - x_1 + 1) * (y_2 - y_1 + 1)
+            return (x_2 - x_1 + 1) * (y_2 - y_1 + 1)
 
 
 if __name__ == '__main__':
